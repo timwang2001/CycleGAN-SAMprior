@@ -3,7 +3,7 @@ from data.base_dataset import BaseDataset, get_transform
 from data.image_folder import make_dataset
 from PIL import Image
 import random
-
+from sam import get_sam_mask
 
 class UnalignedDataset(BaseDataset):
     """
@@ -56,9 +56,16 @@ class UnalignedDataset(BaseDataset):
         B_path = self.B_paths[index_B]
         A_img = Image.open(A_path).convert('RGB')
         B_img = Image.open(B_path).convert('RGB')
+        A_mask = get_sam_mask(A_img)
+        B_mask = get_sam_mask(B_img)
         # apply image transformation
-        A = self.transform_A(A_img)
-        B = self.transform_B(B_img)
+
+        A_m = self.transform_A(A_mask)
+        B_m = self.transform_B(B_mask)
+        print(A.shape,A_m.shape)
+        A = torch.cat((A_m,self.transform_A(A_img)),dim=0)#default resize_and_crop
+        B = torch.cat((B_m,self.transform_B(B_img)),dim=0)
+        print(A.shape)
 
         return {'A': A, 'B': B, 'A_paths': A_path, 'B_paths': B_path}
 
