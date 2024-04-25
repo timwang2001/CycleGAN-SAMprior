@@ -62,10 +62,10 @@ class UnalignedDataset(BaseDataset):
 
         A_m = self.transform_A(A_mask)
         B_m = self.transform_B(B_mask)
-        print(A.shape,A_m.shape)
+        print(A.shape,A_m.shape)#(1,x,x)
         A = torch.cat((A_m,self.transform_A(A_img)),dim=0)#default resize_and_crop
         B = torch.cat((B_m,self.transform_B(B_img)),dim=0)
-        print(A.shape)
+        print(A.shape)#(4,256,256)
 
         return {'A': A, 'B': B, 'A_paths': A_path, 'B_paths': B_path}
 

@@ -618,7 +618,7 @@ class PixelDiscriminator(nn.Module):
 class PerceptualLoss(nn.Module):
     def __init__(self):
         super(PerceptualLoss, self).__init__()
-        vgg = vgg19(pretrained=True).features
+        vgg = vgg19(pretrained=True).features#(256)
         self.vgg_layers = nn.Sequential(*[vgg[i] for i in range(28)])  # 使用 VGG 的前28层
         self.loss = nn.L1Loss()  # 使用 nn.L1Loss
 
