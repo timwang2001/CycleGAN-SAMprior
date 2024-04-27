@@ -25,11 +25,17 @@ class UnalignedDataset(BaseDataset):
         BaseDataset.__init__(self, opt)
         self.dir_A = os.path.join(opt.dataroot, opt.phase + 'A')  # create a path '/path/to/data/trainA'
         self.dir_B = os.path.join(opt.dataroot, opt.phase + 'B')  # create a path '/path/to/data/trainB'
+        # self.dir_Amask = os.path.join(opt.dataroot, opt.phase + 'A_mask')  # create a path '/path/to/data/trainA'
+        # self.dir_Bmask = os.path.join(opt.dataroot, opt.phase + 'B_mask')  # create a path '/path/to/data/trainB'
 
         self.A_paths = sorted(make_dataset(self.dir_A, opt.max_dataset_size))   # load images from '/path/to/data/trainA'
         self.B_paths = sorted(make_dataset(self.dir_B, opt.max_dataset_size))    # load images from '/path/to/data/trainB'
+        # self.A_mask_paths = sorted(make_dataset(self.dir_Amask, opt.max_dataset_size))   # load images from '/path/to/data/trainA'
+        # self.B_mask_paths = sorted(make_dataset(self.dir_Bmask, opt.max_dataset_size))    # load images from '/path/to/data/trainB'
+
         self.A_size = len(self.A_paths)  # get the size of dataset A
         self.B_size = len(self.B_paths)  # get the size of dataset B
+
         btoA = self.opt.direction == 'BtoA'
         input_nc = self.opt.output_nc if btoA else self.opt.input_nc       # get the number of channels of input image
         output_nc = self.opt.input_nc if btoA else self.opt.output_nc      # get the number of channels of output image
@@ -50,24 +56,59 @@ class UnalignedDataset(BaseDataset):
             B_paths (str)    -- image paths
         """
         A_path = self.A_paths[index % self.A_size]  # make sure index is within then range
-        if self.opt.serial_batches:   # make sure index is within then range
-            index_B = index % self.B_size
-        else:   # randomize the index for domain B to avoid fixed pairs.
-            index_B = random.randint(0, self.B_size - 1)
+        # Amask_path = self.A_mask_paths[index % self.A_size] 
+        # Amask_path ='.'+str(A_path).split('.')[1]+'_mask.'+str(A_path).split('.')[2]
+        # Amask_path = Amask_path.replace("trainA", "trainA_mask")
+        parts = A_path.split('/')
+        filename_parts = parts[-1].split('_')
+        number = filename_parts[0]  # This is '012' in your example
+        if int(number) >9  :
+            formatted_number = '0'+ number  # Ensure the number is two digits
+        else:
+            formatted_number = number
+
+        Amask_path =   '/'.join(parts[:-1]).replace("trainA", "trainA_mask")+'/'  + formatted_number + '_' + '_'.join(filename_parts[1:])
+        # print(A_path, Amask_path)       
+        Amask_path ='.'+str(Amask_path).split('.')[1]+'_mask.jpg'
+
+        # print(A_path, Amask_path)
+
+        # if self.opt.serial_batches:   # make sure index is within then range
+        #     index_B = index % self.B_size
+        # else:   # randomize the index for domain B to avoid fixed pairs.
+        #     index_B = random.randint(0, self.B_size - 1)
+        index_B = index % self.B_size
         B_path = self.B_paths[index_B]
+        parts = B_path.split('/')
+        filename_parts = parts[-1].split('_')
+        number = filename_parts[0]  # This is '012' in your example
+        if int(number) >9  :
+            formatted_number = '0'+ number  # Ensure the number is two digits
+        else:
+            formatted_number = number
+
+        Bmask_path =   '/'.join(parts[:-1]).replace("trainB", "trainB_mask")+'/'  + formatted_number + '_' + '_'.join(filename_parts[1:])
+        # print(A_path, Amask_path)       
+        Bmask_path ='.'+str(Bmask_path).split('.')[1]+'_mask.jpg'
+        # print(B_path, Bmask_path)
+
+        # Bmask_path = self.B_mask_paths[index_B]
         A_img = Image.open(A_path).convert('RGB')
         B_img = Image.open(B_path).convert('RGB')
-        A_mask = get_sam_mask(A_img)
-        B_mask = get_sam_mask(B_img)
+        # A_mask = get_sam_mask(A_img)
+        A_mask = Image.open(Amask_path).convert('L')
+        B_mask = Image.open(Bmask_path).convert('L')
         # apply image transformation
 
         A_m = self.transform_mask(A_mask)
         B_m = self.transform_mask(B_mask)
         A = self.transform_A(A_img)
+        # print(self.transform_mask,self.transform_A)
         # print(A.shape,A_m.shape)#(1,x,x)
-        A = torch.cat((A_m,A),dim=0)#default resize_and_crop
-        B = torch.cat((B_m,self.transform_B(B_img)),dim=0)
-        print(A.shape)#(4,256,256)
+        B = self.transform_A(B_img)
+        A = torch.cat((A,A_m),dim=0)#default resize_and_crop
+        B = torch.cat((B,B_m),dim=0)
+        # print(A.shape)#(4,256,256)
 
         return {'A': A, 'B': B, 'A_paths': A_path, 'B_paths': B_path}
 

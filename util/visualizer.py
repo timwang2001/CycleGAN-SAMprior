@@ -121,7 +121,7 @@ class Visualizer():
             save_result (bool) - - if save the current results to an HTML file
         """
         if self.display_id > 0:  # show images in the browser using visdom
-            ncols = self.ncols
+            ncols = self.ncols #4
             if ncols > 0:        # show all the images in one visdom panel
                 ncols = min(ncols, len(visuals))
                 h, w = next(iter(visuals.values())).shape[:2]
@@ -136,6 +136,9 @@ class Visualizer():
                 images = []
                 idx = 0
                 for label, image in visuals.items():
+                    # print(image.shape)
+                    # image = image[:,:3,:,:]
+                    
                     image_numpy = util.tensor2im(image)
                     label_html_row += '<td>%s</td>' % label
                     images.append(image_numpy.transpose([2, 0, 1]))
