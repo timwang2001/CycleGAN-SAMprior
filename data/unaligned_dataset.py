@@ -3,8 +3,8 @@ from data.base_dataset import BaseDataset, get_transform
 from data.image_folder import make_dataset
 from PIL import Image
 import random
-from sam import get_sam_mask
-
+from data.sam import get_sam_mask
+import torch
 class UnalignedDataset(BaseDataset):
     """
     This dataset class can load unaligned/unpaired datasets.
@@ -35,6 +35,7 @@ class UnalignedDataset(BaseDataset):
         output_nc = self.opt.input_nc if btoA else self.opt.output_nc      # get the number of channels of output image
         self.transform_A = get_transform(self.opt, grayscale=(input_nc == 1))
         self.transform_B = get_transform(self.opt, grayscale=(output_nc == 1))
+        self.transform_mask = get_transform(self.opt,grayscale=1)
 
     def __getitem__(self, index):
         """Return a data point and its metadata information.
@@ -60,10 +61,11 @@ class UnalignedDataset(BaseDataset):
         B_mask = get_sam_mask(B_img)
         # apply image transformation
 
-        A_m = self.transform_A(A_mask)
-        B_m = self.transform_B(B_mask)
-        print(A.shape,A_m.shape)#(1,x,x)
-        A = torch.cat((A_m,self.transform_A(A_img)),dim=0)#default resize_and_crop
+        A_m = self.transform_mask(A_mask)
+        B_m = self.transform_mask(B_mask)
+        A = self.transform_A(A_img)
+        # print(A.shape,A_m.shape)#(1,x,x)
+        A = torch.cat((A_m,A),dim=0)#default resize_and_crop
         B = torch.cat((B_m,self.transform_B(B_img)),dim=0)
         print(A.shape)#(4,256,256)
 

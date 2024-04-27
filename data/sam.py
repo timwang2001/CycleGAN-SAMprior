@@ -2,23 +2,10 @@ from segment_anything import SamPredictor, SamAutomaticMaskGenerator, sam_model_
 import cv2
 import numpy as np
 import torch
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from PIL import Image
-# def get_sam_mask(img)
-#     sam = sam_model_registry["default"](checkpoint="pretrained_model/sam_vit_h_4b8939.pth").to('cuda')
-#     mask_generator = SamAutomaticMaskGenerator(
-#         model=sam,
-#         points_per_side=32,
-#         points_per_batch=16,
-#         pred_iou_thresh=0.88,
-#         stability_score_thresh=0.92,
-#         crop_n_layers=1,
-#         crop_n_points_downscale_factor=2,
-#         min_mask_region_area=100,  
-#     )
-#     bgrimg = cv2.cvtColor(np.asarray(image),cv2.COLOR_RGB2BGR)
 def get_sam_mask(image):
-    sam = sam_model_registry["default"](checkpoint="pretrained_model/sam_vit_h_4b8939.pth").to('cuda')
+    sam = sam_model_registry["default"](checkpoint="data/pretrained_model/sam_vit_h_4b8939.pth").to('cuda:1')
     mask_generator = SamAutomaticMaskGenerator(
         model=sam,
         points_per_side=32,
