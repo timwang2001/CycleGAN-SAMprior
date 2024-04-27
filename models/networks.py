@@ -4,6 +4,7 @@ from torch.nn import init
 import functools
 from torch.optim import lr_scheduler
 from torchvision.models import vgg19
+import torchvision.transforms as transforms
 
 ###############################################################################
 # Helper Functions
@@ -621,11 +622,18 @@ class PerceptualLoss(nn.Module):
         vgg = vgg19(pretrained=True).features#(256)
         self.vgg_layers = nn.Sequential(*[vgg[i] for i in range(28)])  # 使用 VGG 的前28层
         self.loss = nn.L1Loss()  # 使用 nn.L1Loss
+        self.transform = transforms.Compose([
+    transforms.ToPILImage(),
+    transforms.Resize((224, 224)),
+    transforms.ToTensor()
+])
 
         for param in self.vgg_layers.parameters():
             param.requires_grad = False  # 冻结模型参数
 
     def forward(self, input, target):
+        input = self.transform(input).unsqueeze(0)
+        target = self.transform(target).unsqueeze(0)
         input_features = self.vgg_layers(input)
         target_features = self.vgg_layers(target)
         # loss = torch.mean(torch.abs(input_features - target_features))  # 计算 L1 损失

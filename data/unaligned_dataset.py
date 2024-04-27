@@ -77,4 +77,5 @@ class UnalignedDataset(BaseDataset):
         As we have two datasets with potentially different number of images,
         we take a maximum of
         """
+
         return max(self.A_size, self.B_size)
