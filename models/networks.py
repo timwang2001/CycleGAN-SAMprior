@@ -620,7 +620,8 @@ class PerceptualLoss(nn.Module):
     def __init__(self):
         super(PerceptualLoss, self).__init__()
         vgg = vgg19(pretrained=True).features#(256)
-        self.vgg_layers = nn.Sequential(*[vgg[i] for i in range(28)])  # 使用 VGG 的前28层
+        self.vgg_layers28 = nn.Sequential(*[vgg[i] for i in range(28)])  # 使用 VGG 的前28层
+        self.vgg_layer12 = nn.Sequential(*[vgg[i] for i in range(28)])  # 使用 VGG 的前28层
         self.loss = nn.L1Loss()  # 使用 nn.L1Loss
         self.transform = transforms.Compose([
     transforms.ToPILImage(),
@@ -628,14 +629,21 @@ class PerceptualLoss(nn.Module):
     transforms.ToTensor()
 ])
 
-        for param in self.vgg_layers.parameters():
+        for param in self.vgg_layers28.parameters():
             param.requires_grad = False  # 冻结模型参数
-
+        for param in self.vgg_layer12.parameters():
+            param.requires_grad = False  # 冻结模型参数
     def forward(self, input, target):
-        input = self.transform(input).unsqueeze(0)
-        target = self.transform(target).unsqueeze(0)
-        input_features = self.vgg_layers(input)
-        target_features = self.vgg_layers(target)
+        input = self.transform(input)
+        # print(input.shape)
+        input = input.repeat(3, 1, 1).unsqueeze(0)
+        target = self.transform(target)
+        target = target.repeat(3, 1, 1).unsqueeze(0)
+        input_features = self.vgg_layers28(input)
+        target_features = self.vgg_layers28(target)
+        loss18 = self.loss(input_features, target_features)
+        loss12 = self.loss(self.vgg_layer12(input), self.vgg_layer12(target))
+        loss = 1/18 * loss18 + 1/12 * loss12
         # loss = torch.mean(torch.abs(input_features - target_features))  # 计算 L1 损失
         # return loss
-        return self.loss(input_features, target_features)  # 使用 nn.L1Loss
+        return loss  # 使用 nn.L1Loss

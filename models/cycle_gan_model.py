@@ -181,12 +181,12 @@ class CycleGANModel(BaseModel):
         # GAN loss D_B(G_B(B))
         self.loss_G_B = self.criterionGAN(self.netD_B(self.fake_A), True)
         # Forward cycle loss || G_B(G_A(A)) - A||
-        self.loss_perceptual_A = self.criterionPerceptual(self.rec_A[:,-1,:,:].squeeze(), self.real_A[:,-1,:,:].squeeze()) * lambda_A
+        self.loss_perceptual_A = self.criterionPerceptual(self.rec_A[:,-1,:,:].squeeze(), self.real_A[:,-1,:,:].squeeze()) * lambda_A//2
         self.loss_cycle_A = self.criterionCycle(self.rec_A[:,:3,:,:], self.real_A[:,:3,:,:]) * lambda_A
         # Backward cycle loss || G_A(G_B(B)) - B||
         self.loss_cycle_B = self.criterionCycle(self.rec_B[:,:3,:,:], self.real_B[:,:3,:,:]) * lambda_B
         # combined loss and calculate gradients
-        self.loss_perceptual_B = self.criterionPerceptual(self.rec_B[:,-1,:,:].squeeze(), self.real_B[:,-1,:,:].squeeze()) * lambda_B
+        self.loss_perceptual_B = self.criterionPerceptual(self.rec_B[:,-1,:,:].squeeze(), self.real_B[:,-1,:,:].squeeze()) * lambda_B//2
 
         self.loss_G = self.loss_G_A + self.loss_G_B + self.loss_cycle_A + self.loss_cycle_B + self.loss_idt_A + self.loss_idt_B +self.loss_perceptual_A +self.loss_perceptual_B
         self.loss_G.backward()
