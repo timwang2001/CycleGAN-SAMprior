@@ -90,4 +90,4 @@ If you use this code for your research, please cite our papers.
 ```
 
 ## Acknowledgments
-Our code is inspired by [segment-anything](https://github.com/pytorch/examples/tree/master/dcgan](https://github.com/facebookresearch/segment-anything?tab=readme-ov-file#model-checkpoints) and [cyclegan](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix)
+Our code is inspired by [segment-anything](https://github.com/facebookresearch/segment-anything) and [cyclegan](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix)
