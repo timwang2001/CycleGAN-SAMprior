@@ -49,7 +49,13 @@ cd pytorch-CycleGAN-and-pix2pix
   - For Docker users, we provide the pre-built Docker image and Dockerfile. Please refer to our [Docker](docs/docker.md) page.
   - For Repl users, please click [![Run on Repl.it](https://repl.it/badge/github/junyanz/pytorch-CycleGAN-and-pix2pix)](https://repl.it/github/junyanz/pytorch-CycleGAN-and-pix2pix).
 
+And to install SAM, please follow [SAM](https://github.com/facebookresearch/segment-anything?tab=readme-ov-file#model-checkpoints)
+
+Install Segment Anything
+```bash
+pip install git+https://github.com/facebookresearch/segment-anything.git
 ### CycleGAN train/test
+```
 - Download a CycleGAN dataset (e.g. maps):
 ```bash
 bash ./datasets/download_cyclegan_dataset.sh maps
